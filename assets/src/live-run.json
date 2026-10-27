@@ -1,0 +1,112 @@
+{
+  "recorded_at": "2026-10-27T02:04:22.508Z",
+  "server": {
+    "name": "brightdata-mcp-plus",
+    "version": "1.1.0"
+  },
+  "tools": 5,
+  "rows": [
+    {
+      "url": "https://en.wikipedia.org/wiki/Model_Context_Protocol",
+      "ok": true,
+      "ms": 529,
+      "chars": 1952,
+      "note": "[server] Fetched directly (free).",
+      "preview": "[Jump to content](#bodyContent) Main menu Main menu move to sidebar hide Navigation * [Mai"
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
+      "ok": true,
+      "ms": 384,
+      "chars": 2005,
+      "note": "[server] Fetched directly (free).",
+      "preview": "* [Skip to main content](#content) * [Skip to search](#mdn-search) [ MDN ](https://develop"
+    },
+    {
+      "url": "https://news.ycombinator.com/",
+      "ok": true,
+      "ms": 436,
+      "chars": 2092,
+      "note": "[server] Fetched directly (free).",
+      "preview": "| [](https://news.ycombinator.com)[Hacker News](https://news.ycombinator.com/news)[new](ht"
+    },
+    {
+      "url": "https://github.com/modelcontextprotocol/servers",
+      "ok": true,
+      "ms": 513,
+      "chars": 2081,
+      "note": "[server] Fetched directly (free).",
+      "preview": "[Skip to content](#start-of-content) ## Navigation Menu [Sign in](https://github.com/login"
+    },
+    {
+      "url": "https://registry.npmjs.org/@modelcontextprotocol/sdk/latest",
+      "ok": true,
+      "ms": 388,
+      "chars": 2091,
+      "note": "[server] Fetched directly (free).",
+      "preview": "{\"bugs\":{\"url\":\"https://github.com/modelcontextprotocol/typescript-sdk/issues\"},\"dist\":{\"s"
+    },
+    {
+      "url": "https://www.g2.com/products/notion/reviews",
+      "ok": false,
+      "ms": 156,
+      "chars": 0,
+      "note": "[blocked] Direct fetch of www.g2.com did not return usable content (cloudflare_challenge)",
+      "preview": ""
+    },
+    {
+      "url": "https://www.reddit.com/r/mcp/",
+      "ok": false,
+      "ms": 75,
+      "chars": 0,
+      "note": "[blocked] Direct fetch of www.reddit.com did not return usable content (needs_javascript)",
+      "preview": ""
+    },
+    {
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "ok": false,
+      "ms": 0,
+      "chars": 0,
+      "note": "[bad_request] Refusing to fetch 169.254.169.254: it resolves to a private or local network address",
+      "preview": ""
+    }
+  ],
+  "stats": {
+    "uptime_s": 3,
+    "billable": {
+      "unlocker_requests": 0,
+      "scraper_records": 0,
+      "dataset_records": 0,
+      "browser_navigations": 0
+    },
+    "estimated_cost_usd": 0,
+    "free": {
+      "direct_fetches": 5,
+      "direct_misses": 2,
+      "estimated_savings_usd": 0.0075
+    },
+    "budget": null,
+    "tools": {
+      "scrape_as_markdown": {
+        "calls": 8,
+        "errors": 3,
+        "cache_hits": 0,
+        "p50_ms": 387,
+        "p95_ms": 527
+      }
+    },
+    "fetch_strategy": "direct",
+    "cache": {
+      "entries": 5,
+      "hits": 0,
+      "misses": 8
+    },
+    "upstream_calls": 0,
+    "open_browser_sessions": 0,
+    "zones": {
+      "unlocker": "missing",
+      "browser": "missing",
+      "error": "API_TOKEN not set (free mode)"
+    }
+  }
+}

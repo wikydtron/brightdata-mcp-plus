@@ -1,0 +1,61 @@
+{
+  "name": "brightdata-mcp-plus",
+  "version": "1.1.0",
+  "description": "A hardened, drop-in MCP server for live web data: free direct fetching with Bright Data fallback, 34 tools, budgets, caching, pagination, SSRF guard, stdio + Streamable HTTP.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wikydtron/brightdata-mcp-plus.git"
+  },
+  "homepage": "https://github.com/wikydtron/brightdata-mcp-plus#readme",
+  "bugs": {
+    "url": "https://github.com/wikydtron/brightdata-mcp-plus/issues"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "brightdata",
+    "web-scraping",
+    "web-unlocker",
+    "claude",
+    "ai-agents"
+  ],
+  "bin": {
+    "brightdata-mcp-plus": "dist/src/index.js"
+  },
+  "main": "dist/src/index.js",
+  "files": [
+    "dist/src",
+    "LICENSE.upstream"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "tsc -p tsconfig.json",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\"",
+    "start": "node dist/src/index.js",
+    "start:http": "node dist/src/index.js --transport http",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test --test-reporter=spec \"dist/test/**/*.test.js\"",
+    "smoke:live": "node scripts/live-smoke.mjs",
+    "render:assets": "node scripts/render-assets.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "node-html-markdown": "^2.0.0",
+    "remark": "^15.0.1",
+    "strip-markdown": "^6.0.0",
+    "zod": "^3.25.76"
+  },
+  "optionalDependencies": {
+    "playwright-core": "1.64.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,85 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>architecture</title>
+<style>
+  html, body { margin: 0; width: 1280px; height: 1010px; overflow: hidden; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; color: #e6edf3; background: #0d1117; padding: 34px 56px 0; box-sizing: border-box; }
+  h2 { margin: 0 0 22px; font-size: 26px; font-weight: 700; }
+  h2 small { font-size: 15px; font-weight: 500; color: #8b949e; margin-left: 12px; }
+  .layer { position: relative; border-radius: 16px; border: 1px solid #30363d; background: #161b22; padding: 40px 20px 16px; }
+  .label { position: absolute; left: 20px; top: 15px; font: 600 12px/1 "Cascadia Code", Consolas, monospace; letter-spacing: .1em; text-transform: uppercase; color: #8b949e; }
+  .row { display: flex; gap: 12px; align-items: stretch; }
+  .box { flex: 1; border-radius: 11px; padding: 11px 14px; background: #0d1117; border: 1px solid #30363d; font-size: 15px; font-weight: 600; }
+  .box small { display: block; margin-top: 4px; font-size: 12.5px; font-weight: 500; color: #8b949e; line-height: 1.35; }
+  .teal { border-color: #2dd4bf; } .blue { border-color: #60a5fa; } .green { border-color: #34d399; } .amber { border-color: #fbbf24; } .violet { border-color: #a78bfa; } .rose { border-color: #fb7185; }
+  .arrow { height: 26px; position: relative; }
+  .arrow::before { content: ""; position: absolute; left: 50%; top: 4px; width: 2px; height: 12px; background: #484f58; }
+  .arrow::after { content: ""; position: absolute; left: calc(50% - 5px); top: 14px; border: 6px solid transparent; border-top: 8px solid #484f58; }
+  .pipe { align-items: center; gap: 8px; }
+  .pipe .step { flex: none; padding: 9px 13px; border-radius: 9px; background: #0d1117; border: 1px solid #2dd4bf; font-size: 14px; font-weight: 600; }
+  .pipe .sep { color: #6e7681; font-weight: 700; }
+  .ends { background: #0d1117; border-style: dashed; padding-top: 16px; }
+  .ends .box { text-align: center; }
+</style></head>
+<body>
+  <h2>Architecture <small>one isolated session per client: its own token, cache, budget and browser</small></h2>
+
+  <div class="layer"><div class="label">Clients</div>
+    <div class="row">
+      <div class="box">Claude Code<small>stdio</small></div>
+      <div class="box">Claude Desktop<small>stdio</small></div>
+      <div class="box">Cursor / VS Code<small>stdio</small></div>
+      <div class="box">Remote agents<small>Streamable HTTP · Bearer token</small></div>
+    </div>
+  </div>
+  <div class="arrow"></div>
+
+  <div class="layer"><div class="label">Transports</div>
+    <div class="row">
+      <div class="box blue">stdio<small>JSON-RPC on stdout, JSON logs on stderr, graceful shutdown</small></div>
+      <div class="box blue">Streamable HTTP<small>per-session servers, idle eviction, DNS-rebinding guard, /healthz</small></div>
+    </div>
+  </div>
+  <div class="arrow"></div>
+
+  <div class="layer"><div class="label">Tool pipeline (every call)</div>
+    <div class="row pipe">
+      <div class="step">rate limit</div><span class="sep">→</span>
+      <div class="step">zod validation</div><span class="sep">→</span>
+      <div class="step">handler + cancel signal + progress</div><span class="sep">→</span>
+      <div class="step">content gate</div><span class="sep">→</span>
+      <div class="step">untrusted wrap</div><span class="sep">→</span>
+      <div class="step">metrics</div><span class="sep">→</span>
+      <div class="step">typed error + hint</div>
+    </div>
+  </div>
+  <div class="arrow"></div>
+
+  <div class="layer"><div class="label">Services</div>
+    <div class="row">
+      <div class="box green">PageFetcher<small>direct first (free), Bright Data fallback, host memory, cache</small></div>
+      <div class="box amber">Unlocker &amp; SERP<small>Web Unlocker, Google / Bing / Yandex, parsed results</small></div>
+      <div class="box violet">Scrapers<small>1,200+ catalog, input validation, jobs, paging</small></div>
+      <div class="box violet">Datasets &amp; AI<small>filter search, ChatGPT / Perplexity insights</small></div>
+      <div class="box rose">Browser<small>remote CDP, ARIA refs, idle reaping, LRU cap</small></div>
+    </div>
+  </div>
+  <div class="arrow"></div>
+
+  <div class="layer"><div class="label">Core</div>
+    <div class="row">
+      <div class="box teal">BrightDataClient<small>timeouts · jittered retries · Retry-After · semaphore</small></div>
+      <div class="box teal">UsageMeter<small>budget reservations · rate limit · cost &amp; savings</small></div>
+      <div class="box teal">Security<small>SSRF guard · redaction · nonce markers</small></div>
+      <div class="box teal">TtlCache<small>LRU + TTL · single-flight</small></div>
+    </div>
+  </div>
+  <div class="arrow"></div>
+
+  <div class="layer ends">
+    <div class="row">
+      <div class="box green">The open web<small>direct requests from your machine (free)</small></div>
+      <div class="box amber">api.brightdata.com<small>Web Unlocker · Scraper API · Datasets (billed)</small></div>
+      <div class="box rose">brd.superproxy.io:9222<small>remote browsers over CDP (billed)</small></div>
+    </div>
+  </div>
+</body></html>
