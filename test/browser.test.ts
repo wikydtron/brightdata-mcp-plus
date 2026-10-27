@@ -55,8 +55,16 @@ before(async () => {
   profile = mkdtempSync(join(tmpdir(), 'bdmcp-browser-'));
   chrome = spawn(executable, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`,
     '--no-first-run', '--no-default-browser-check', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });
+  // cold starts on busy CI runners (other test files start Chrome in parallel) can take well over 10 s
   const portFile = join(profile, 'DevToolsActivePort');
-  for (let i = 0; i < 100 && !existsSync(portFile); i++) await new Promise((r) => setTimeout(r, 100));
+  let exited: number | null = null;
+  chrome.once('exit', (code) => { exited = code ?? -1; });
+  const deadline = Date.now() + 45_000;
+  while (!existsSync(portFile) || !readFileSync(portFile, 'utf8').includes('\n')) {
+    if (exited !== null) throw new Error(`Chrome exited with code ${exited} before opening its DevTools port`);
+    if (Date.now() > deadline) throw new Error('Chrome did not open its DevTools port within 45 s');
+    await new Promise((r) => setTimeout(r, 100));
+  }
   const [port, path] = readFileSync(portFile, 'utf8').trim().split('\n');
   h = await connect(stub, { BROWSER_CDP_ENDPOINT: `ws://127.0.0.1:${port}${path}` });
 });
