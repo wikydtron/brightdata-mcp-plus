@@ -65,17 +65,31 @@
         <rect x="310.5" y="202.5" width="159" height="63" rx="14" stroke="#fbbf24" stroke-opacity=".8"/>
       </g>
 
-      <!-- labels (right-hand boxes leave 18 px of padding after the longest line) -->
-      <text x="60" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#e6edf3">AI agent</text>
-      <text x="60" y="167" text-anchor="middle" font-size="12.5" fill="#94a3b8">Claude, Cursor…</text>
-      <text x="215" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#e6edf3">MCP+</text>
-      <text x="215" y="167" text-anchor="middle" font-size="12.5" fill="#94a3b8">pipeline</text>
-      <circle cx="328" cy="61" r="4.5" fill="#34d399"/>
-      <text x="339" y="66" font-size="15" font-weight="600" fill="#e6edf3">Free routes</text>
-      <text x="326" y="87" font-size="12.5" fill="#94a3b8">direct · local Chrome</text>
-      <circle cx="328" cy="229" r="4.5" fill="#fbbf24"/>
-      <text x="339" y="234" font-size="15" font-weight="600" fill="#e6edf3">Bright Data</text>
-      <text x="326" y="255" font-size="12.5" fill="#94a3b8">unblocker, billed</text>
+      <!-- labels: every box centres its two lines on the box centre (cx, cy): title at cy-9, subtitle at cy+11 -->
+      <g text-anchor="middle" dominant-baseline="central">
+        <text x="60" y="141" font-size="15" font-weight="600" fill="#e6edf3">AI agent</text>
+        <text x="60" y="161" font-size="12.5" fill="#94a3b8">Claude, Cursor…</text>
+        <text x="215" y="141" font-size="15" font-weight="600" fill="#e6edf3">MCP+</text>
+        <text x="215" y="161" font-size="12.5" fill="#94a3b8">pipeline</text>
+        <text x="390" y="57" font-size="15" font-weight="600" fill="#e6edf3" data-dot="#34d399">Free routes</text>
+        <text x="390" y="77" font-size="12.5" fill="#94a3b8">direct · local Chrome</text>
+        <text x="390" y="225" font-size="15" font-weight="600" fill="#e6edf3" data-dot="#fbbf24">Bright Data</text>
+        <text x="390" y="245" font-size="12.5" fill="#94a3b8">unblocker, billed</text>
+      </g>
     </svg>
   </div>
+  <script>
+    // status dots: a 9 px circle 7 px left of the title, with dot + title centred together on the box
+    for (const t of document.querySelectorAll('text[data-dot]')) {
+      const r = 4.5, gap = 7;
+      t.setAttribute('x', String(Number(t.getAttribute('x')) + (2 * r + gap) / 2));
+      const bb = t.getBBox();
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', String(bb.x - gap - r));
+      dot.setAttribute('cy', String(Number(t.getAttribute('y')) + 0.5));
+      dot.setAttribute('r', String(r));
+      dot.setAttribute('fill', t.dataset.dot);
+      t.parentNode.appendChild(dot);
+    }
+  </script>
 </body></html>
