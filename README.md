@@ -18,12 +18,12 @@ search, 1,200+ pre-built scrapers, datasets and remote browsers.
 
 It is a ground-up TypeScript rebuild of the official [`@brightdata/mcp`](https://github.com/brightdata/brightdata-mcp),
 keeping its tool names and environment variables so it works as a drop-in replacement, and adding what it was missing:
-**free direct fetching with automatic fallback**, spending guards, caching, pagination, cancellation, retries, an
-SSRF guard, a built-in HTTP transport and a real test suite.
+**free direct fetching and local Chrome rendering, with Bright Data only as the fallback for bot walls**, spending
+guards, caching, pagination, cancellation, retries, an SSRF guard, a built-in HTTP transport and a real test suite.
 
 > Unofficial project, not affiliated with Bright Data. Bright Data features (search, scrapers, unblocking, remote
 > browsers) need your own [Bright Data API token](https://brightdata.com/cp/setting/users) and are billed by Bright Data.
-> Plain page fetching works with no account at all.
+> Page fetching, including JavaScript apps rendered in your own Chrome, works with no account at all.
 
 ## Contents
 
@@ -71,7 +71,8 @@ guard. Every result tells the agent how it was fetched:
 
 ## Quick start
 
-Requires **Node.js 22+**.
+Requires **Node.js 22+**. Google Chrome or Microsoft Edge is optional: with one installed, JavaScript apps are
+rendered locally for free; without one they go to Bright Data (or fail in free mode).
 
 ```bash
 git clone https://github.com/wikydtron/brightdata-mcp-plus.git
@@ -91,8 +92,9 @@ npx -y github:wikydtron/brightdata-mcp-plus --list-tools
 or Edge (found automatically; set `CHROME_PATH` otherwise). Add `BROWSER_CDP_ENDPOINT` to drive your own Chrome with
 the interactive browser tools too.
 
-**Full mode:** set `API_TOKEN` to unlock search, scrapers, datasets, AI-insights and Bright Data's remote browsers,
-with direct-first fetching still saving requests. Check your token and zones first:
+**Full mode:** set `API_TOKEN` to unlock search, scrapers, datasets, AI-insights and Bright Data's remote browsers.
+Page fetching still tries the free routes (direct, then local Chrome) first, so only bot-walled pages are billed.
+Check your token and zones first:
 
 ```bash
 API_TOKEN=your_token node dist/src/index.js --check
@@ -163,6 +165,8 @@ Binding to a non-loopback address with a shared `API_TOKEN` requires `HTTP_AUTH_
 docker build -t brightdata-mcp-plus .
 docker run -i --rm -e API_TOKEN=your_token brightdata-mcp-plus
 ```
+The image is a slim Node.js image without a browser, so local rendering is skipped there and JavaScript apps go to
+Bright Data. Run it with Node directly if you want free rendering.
 </details>
 
 ## How page fetching works
@@ -184,8 +188,9 @@ Details:
 - **Local rendering** uses your installed Chrome or Edge through `playwright-core` (no browser download). One
   headless browser is shared by all sessions, each render gets a fresh incognito context, images, media and fonts
   are skipped, and the browser closes after 2 idle minutes. A render finishes as soon as the app has produced text
-  or its network goes quiet, so an empty shell fails over in about a second instead of waiting out a timeout. It renders pages; it does not try to
-  evade bot detection, so walls still go to Bright Data, which exists for that.
+  or its network goes quiet, so an empty shell fails over in about a second instead of waiting out a timeout. The
+  first render after the browser has been closed can take several seconds longer while it starts. It renders pages; it
+  does not try to evade bot detection, so walls still go to Bright Data, which exists for that.
 - **Host memory:** for 30 minutes, a host that needed rendering skips the direct attempt, and a host that blocked
   goes straight to Bright Data.
 - **Country routing** (`country: "de"`) always uses Bright Data, since geo-targeting needs a proxy.
@@ -204,10 +209,10 @@ Details:
 |---|---|---|
 | `search_engine` | Google (ranked JSON), Bing or Yandex (Markdown) | `engine`, `geo_location`, `language`, `time_range`, `cursor`, `fresh` |
 | `search_engine_batch` | Up to 10 searches in parallel | `queries[]` |
-| `scrape_as_markdown` | One page as compact Markdown, direct-first | `format` (markdown/text/raw), `offset`, `max_chars`, `country`, `fresh` |
-| `scrape_batch` | Up to 10 pages in parallel, each with its `source` | `urls[]`, `max_chars_per_url` |
-| `scrape_as_html` | Raw HTML, paginated | `offset`, `max_chars` |
-| `extract` | Page to JSON using **your own model** via MCP sampling | `extraction_prompt`, `schema` (JSON Schema) |
+| `scrape_as_markdown` | One page as compact Markdown via direct → local Chrome → Bright Data; a note says which | `format` (markdown/text/raw), `offset`, `max_chars`, `country`, `fresh` |
+| `scrape_batch` | Up to 10 pages in parallel, each with its `source` (`direct`, `local_browser`, `brightdata`, `cache`) | `urls[]`, `max_chars_per_url` |
+| `scrape_as_html` | HTML, paginated (the rendered DOM when the page needed JavaScript) | `offset`, `max_chars` |
+| `extract` | Page to JSON using **your own model** via MCP sampling; fetches like `scrape_as_markdown` | `extraction_prompt`, `schema` (JSON Schema) |
 </details>
 
 <details>
@@ -231,7 +236,7 @@ Details:
 | `list_dataset_fields` / `search_dataset` | Filter search over LinkedIn people and company datasets |
 | `chatgpt_ai_insights` / `perplexity_ai_insights` | Ask ChatGPT or Perplexity (for GEO / brand visibility); long jobs return a `snapshot_id` instead of failing |
 | `ask_brightdata_assistant` | Bright Data's support assistant, with threaded follow-ups |
-| `session_stats` | Calls, errors, p50/p95 latency, cache hits, billable units, estimated cost, free fetches and savings, budget left |
+| `session_stats` | Calls, errors, p50/p95 latency, cache hits, billable units, estimated cost, free direct fetches and local renders, savings, local-rendering status, budget left |
 </details>
 
 <details>
@@ -350,7 +355,7 @@ src/
 | `RATE_LIMIT` | Browser tools skip it | Every tool |
 | `extract` | Samples from the first session, not the caller | Calling session, optional JSON Schema |
 | HTTP | Hosted only, token in URL | Built in, header auth, per-session isolation |
-| SSRF protection | n/a | Private-range guard on every hop |
+| SSRF protection | n/a | Private-range guard on every redirect hop and on every request inside the local browser |
 | Docker | Image copies 3 of 15 modules | Multi-stage, non-root, healthcheck |
 | Tests | Unit and stub tests | 70: unit, fake Bright Data API, real MCP clients over in-memory/stdio/HTTP, real headless Chrome (CDP and local rendering) |
 
@@ -382,11 +387,13 @@ needed.
 `needs_javascript > render:captcha` (a JavaScript app that showed a CAPTCHA even to a real browser). Use
 `FETCH_STRATEGY=direct` to never pay, at the cost of failing on protected sites.
 
-**Do I need Chrome?** No. Without Chrome or Edge the render step is skipped (`session_stats` shows
-`local_rendering: "unavailable"`) and JavaScript apps go to Bright Data as before.
+**Do I need Chrome?** No. Without Chrome or Edge the render step is skipped: the first page that needs it falls
+through to Bright Data with the reason `render:unavailable`, and from then on `session_stats` shows
+`local_rendering: "unavailable (no Chrome/Edge found)"`. Set `CHROME_PATH` if your browser is in a non-standard
+place, or `LOCAL_RENDER=off` to skip the attempt entirely.
 
-**Is direct fetching allowed?** It's an ordinary HTTP request from your machine, like a browser. You are responsible
-for respecting each site's terms and robots rules.
+**Is direct fetching and local rendering allowed?** Both are ordinary requests from your machine, the same as opening
+the page in your browser. You are responsible for respecting each site's terms and robots rules.
 
 **Is this official?** No. It's an independent MIT-licensed project derived from
 [brightdata/brightdata-mcp](https://github.com/brightdata/brightdata-mcp) (MIT, see [LICENSE.upstream](LICENSE.upstream)).

@@ -20,17 +20,19 @@ Usage: brightdata-mcp-plus [options]
   --groups a,b             Tool groups (env GROUPS): ${Object.keys(GROUPS).join(', ')}
   --tools a,b              Individual tools (env TOOLS)
   --fetch auto|direct|brightdata
-                           Page fetching (env FETCH_STRATEGY, default auto: free direct
-                           fetch first, Bright Data only when blocked)
+                           Page fetching (env FETCH_STRATEGY, default auto: direct fetch,
+                           then local Chrome/Edge for JavaScript apps, both free; Bright
+                           Data only for bot walls)
   --check                  Verify the API token and zones, then exit
   --list-tools             Print the available tools, then exit
   --version | --help
 
-Without API_TOKEN the server runs in free mode (direct fetching tools only).
+Without API_TOKEN the server runs in free mode: the page tools only, fetching directly
+and rendering JavaScript apps in your local Chrome/Edge.
 
-Key environment variables: API_TOKEN, FETCH_STRATEGY, WEB_UNLOCKER_ZONE, BROWSER_ZONE,
-BUDGET_MAX_REQUESTS, MAX_RECORDS_PER_RUN, RATE_LIMIT, CACHE_TTL, MAX_OUTPUT_CHARS, LOG_LEVEL.
-See README.md for the full list.`;
+Key environment variables: API_TOKEN, FETCH_STRATEGY, LOCAL_RENDER, CHROME_PATH,
+WEB_UNLOCKER_ZONE, BROWSER_ZONE, BUDGET_MAX_REQUESTS, MAX_RECORDS_PER_RUN, RATE_LIMIT,
+CACHE_TTL, MAX_OUTPUT_CHARS, LOG_LEVEL. See README.md for the full list.`;
 
 async function check(config: Config, logger: Logger, redactor: Redactor): Promise<number> {
   if (!config.apiToken) {
