@@ -141,6 +141,17 @@ test('Google SERP parsing drops incomplete entries and ranks results', () => {
   assert.throws(() => parseGoogleSerp('<html>', 0), /non-JSON/);
 });
 
+test('Google SERP parsing keeps related searches and "People also ask" questions', () => {
+  const r = parseGoogleSerp(JSON.stringify({
+    organic: [],
+    related: [{ text: 'free svg files' }, 'svg files for cricut', { link: 'no text' }],
+    people_also_ask: [{ question: 'Where can I find free laser files?' }, 'Plain string question?', { answer: 'only an answer' }],
+  }), 0);
+  assert.deepEqual(r.related, ['free svg files', 'svg files for cricut']);
+  assert.deepEqual(r.questions, ['Where can I find free laser files?', 'Plain string question?']);
+  assert.deepEqual(parseGoogleSerp('{}', 0).questions, []);
+});
+
 test('pagination cuts at line breaks and reports next_offset', () => {
   const text = Array.from({ length: 100 }, (_, i) => `line ${i}`).join('\n');
   const p1 = paginate(text, 0, 100);

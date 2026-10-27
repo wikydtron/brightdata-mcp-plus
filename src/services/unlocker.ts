@@ -3,7 +3,7 @@ import type { TtlCache } from '../util/cache.js';
 import type { UsageMeter } from '../usage.js';
 
 export interface UnlockOptions {
-  dataFormat?: 'markdown' | 'parsed_light';
+  dataFormat?: 'markdown';
   country?: string | undefined;
   tool: string;
   signal?: AbortSignal;

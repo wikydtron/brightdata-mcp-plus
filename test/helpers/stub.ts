@@ -61,6 +61,7 @@ export async function startStub() {
           { title: 'no link' },
         ],
         related: [{ text: 'related one' }],
+        people_also_ask: [{ question: 'What is a question?' }, { answer: 'no question here' }],
       });
     }
     if (url.includes('bing.com')) return send(res, 200, '# Bing results\n\n[Result](https://r.example) **bold**');

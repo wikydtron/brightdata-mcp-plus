@@ -1,6 +1,6 @@
 {
   "name": "brightdata-mcp-plus",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A hardened, drop-in MCP server for live web data: free direct fetching and local Chrome rendering with Bright Data fallback, 34 tools, budgets, caching, pagination, SSRF guard, stdio + Streamable HTTP.",
   "type": "module",
   "private": true,

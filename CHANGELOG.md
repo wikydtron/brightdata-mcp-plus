@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.2
+
+### Fixed
+- `search_engine` and `search_engine_batch` (Google) now return Google's related searches. Requests asked Bright Data
+  for `data_format: parsed_light`, which keeps only the ranked results, so `related` was always missing. Google
+  searches now use the full `brd_json=1` parse; in a live check, 3 of 4 queries came back with 2-8 related searches.
+
+### Added
+- Google results include `people_also_ask` (up to 8 questions) when the results page has a "People also ask" box.
+
 ## 1.2.1
 
 ### Security

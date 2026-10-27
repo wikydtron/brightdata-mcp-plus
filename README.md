@@ -8,7 +8,7 @@
   <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square">
   <img alt="MCP SDK 1.32" src="https://img.shields.io/badge/MCP%20SDK-1.32-a78bfa?style=flat-square">
   <a href="https://github.com/wikydtron/brightdata-mcp-plus/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/wikydtron/brightdata-mcp-plus/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="70 tests" src="https://img.shields.io/badge/tests-70%20passing-34d399?style=flat-square">
+  <img alt="71 tests" src="https://img.shields.io/badge/tests-71%20passing-34d399?style=flat-square">
   <img alt="34 tools" src="https://img.shields.io/badge/tools-34-fbbf24?style=flat-square">
 </p>
 
@@ -78,7 +78,7 @@ rendered locally for free; without one they go to Bright Data (or fail in free m
 git clone https://github.com/wikydtron/brightdata-mcp-plus.git
 cd brightdata-mcp-plus
 npm install        # also builds (prepare script)
-npm test           # optional: 70 tests, ~10 s
+npm test           # optional: 71 tests, ~10 s
 ```
 
 Or run it straight from GitHub without cloning:
@@ -207,7 +207,7 @@ Details:
 
 | Tool | What it does | Key options |
 |---|---|---|
-| `search_engine` | Google (ranked JSON), Bing or Yandex (Markdown) | `engine`, `geo_location`, `language`, `time_range`, `cursor`, `fresh` |
+| `search_engine` | Google (ranked JSON with related searches and "People also ask"), Bing or Yandex (Markdown) | `engine`, `geo_location`, `language`, `time_range`, `cursor`, `fresh` |
 | `search_engine_batch` | Up to 10 searches in parallel | `queries[]` |
 | `scrape_as_markdown` | One page as compact Markdown via direct → local Chrome → Bright Data; a note says which | `format` (markdown/text/raw), `offset`, `max_chars`, `country`, `fresh` |
 | `scrape_batch` | Up to 10 pages in parallel, each with its `source` (`direct`, `local_browser`, `brightdata`, `cache`) | `urls[]`, `max_chars_per_url` |
@@ -363,7 +363,7 @@ src/
 
 ```bash
 npm run build          # tsc
-npm test               # build + 70 tests (browser and render tests use local Chrome/Edge if found)
+npm test               # build + 71 tests (browser and render tests use local Chrome/Edge if found)
 npm run typecheck
 node scripts/live-smoke.mjs                                 # real sites, free mode, no cost
 node scripts/live-smoke.mjs --json assets/src/live-run.json # refresh demo data

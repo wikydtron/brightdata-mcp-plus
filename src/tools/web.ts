@@ -50,12 +50,18 @@ async function runSearch(a: SearchArgs, svc: Services, tool: string, signal: Abo
   const page = pageOf(a.cursor);
   const url = buildSearchUrl({ engine: a.engine, query: a.query, page, geo: a.geo_location, language: a.language, timeRange: a.time_range });
   const isGoogle = a.engine === 'google';
-  const res = await svc.unlocker.fetch(url, { dataFormat: isGoogle ? 'parsed_light' : 'markdown', tool, signal, bypassCache });
+  // Google: the full `brd_json=1` parse (no data_format). `parsed_light` drops related searches and "People also ask".
+  const res = await svc.unlocker.fetch(url, { ...(isGoogle ? {} : { dataFormat: 'markdown' as const }), tool, signal, bypassCache });
   if (isGoogle) {
-    const { organic, related } = parseGoogleSerp(res.body, page);
+    const { organic, related, questions } = parseGoogleSerp(res.body, page);
     return {
       cached: res.cached,
-      value: { engine: a.engine, query: a.query, page, results: organic, ...(related.length ? { related } : {}), next_cursor: organic.length ? String(page + 1) : null },
+      value: {
+        engine: a.engine, query: a.query, page, results: organic,
+        ...(related.length ? { related } : {}),
+        ...(questions.length ? { people_also_ask: questions } : {}),
+        next_cursor: organic.length ? String(page + 1) : null,
+      },
     };
   }
   const md = paginate(await minifyMarkdown(res.body, 'markdown'), 0, maxOut);
@@ -65,8 +71,9 @@ async function runSearch(a: SearchArgs, svc: Services, tool: string, signal: Abo
 export const searchEngine = defineTool({
   name: 'search_engine',
   title: 'Search Engine',
-  description: 'Search Google, Bing or Yandex. Google returns ranked JSON results (title, link, description) plus '
-    + 'next_cursor for paging; Bing/Yandex return compact Markdown. Supports country, language and time filters. '
+  description: 'Search Google, Bing or Yandex. Google returns ranked JSON results (title, link, description), its '
+    + 'related searches and "People also ask" questions when the page has them, plus next_cursor for paging; '
+    + 'Bing/Yandex return compact Markdown. Supports country, language and time filters. '
     + 'Identical searches within the cache window are free.',
   input: { ...searchShape, fresh },
   annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: true, idempotentHint: true },

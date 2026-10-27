@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DEFAULT_USER_AGENT } from './services/direct.js';
 
-export const VERSION = '1.2.1';
+export const VERSION = '1.2.2';
 export const PACKAGE_NAME = 'brightdata-mcp-plus';
 
 export interface RateLimit {

@@ -47,7 +47,7 @@ export interface OrganicResult {
 const str = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
 
 /** Reduces Bright Data's parsed Google SERP JSON to compact organic results. */
-export function parseGoogleSerp(body: string, page: number): { organic: OrganicResult[]; related: string[] } {
+export function parseGoogleSerp(body: string, page: number): { organic: OrganicResult[]; related: string[]; questions: string[] } {
   let data: unknown;
   try {
     data = JSON.parse(body);
@@ -69,5 +69,9 @@ export function parseGoogleSerp(body: string, page: number): { organic: OrganicR
     .map((r) => (typeof r === 'string' ? r : str((r as Record<string, unknown> | null)?.text)))
     .filter(Boolean)
     .slice(0, 8);
-  return { organic, related };
+  const questions = (Array.isArray(obj.people_also_ask) ? obj.people_also_ask : [])
+    .map((q) => (typeof q === 'string' ? q.trim() : str((q as Record<string, unknown> | null)?.question)))
+    .filter(Boolean)
+    .slice(0, 8);
+  return { organic, related, questions };
 }

@@ -31,9 +31,11 @@ test('search_engine returns compact ranked JSON wrapped as untrusted content', a
   assert.deepEqual(data.results.map((x: { link: string }) => x.link), ['https://a.example', 'https://b.example']);
   assert.equal(data.next_cursor, '1');
   assert.deepEqual(data.related, ['related one']);
-  const sent = stub.calls.filter((c) => c.path === '/request').at(-1)!.body as { url: string; data_format: string };
+  assert.deepEqual(data.people_also_ask, ['What is a question?']);
+  const sent = stub.calls.filter((c) => c.path === '/request').at(-1)!.body as { url: string; data_format?: string };
   assert.ok(sent.url.includes('gl=us') && sent.url.includes('tbs=qdr%3Am') && sent.url.endsWith('brd_json=1'));
-  assert.equal(sent.data_format, 'parsed_light');
+  // the full brd_json parse: parsed_light would drop related searches and "People also ask"
+  assert.equal(sent.data_format, undefined);
   const bing = await h.call('search_engine', { query: 'x', engine: 'bing' });
   assert.ok(JSON.parse(unwrap(h.text(bing))).markdown.includes('[Result](https://r.example)'));
   await h.close();
