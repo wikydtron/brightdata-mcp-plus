@@ -22,15 +22,7 @@
   .chip { font-size: 15px; font-weight: 600; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(148,163,184,.28); background: rgba(15, 23, 42, .6); color: #dbe7f5; }
   .chip b { color: #34d399; font-weight: 700; }
   .flow { position: absolute; right: 64px; top: 58px; width: 470px; height: 300px; }
-  .node { position: absolute; box-sizing: border-box; border-radius: 14px; padding: 11px 12px; font-size: 15px; font-weight: 600; background: rgba(15, 23, 42, .85); border: 1px solid rgba(148,163,184,.3); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-  .node small { display: block; font-weight: 500; font-size: 12.5px; color: #94a3b8; margin-top: 3px; }
-  .agent { left: 0; top: 118px; width: 130px; height: 64px; text-align: center; }
-  .mcp { left: 175px; top: 118px; width: 120px; height: 64px; text-align: center; border-color: rgba(45,212,191,.7); box-shadow: 0 0 0 4px rgba(45,212,191,.12), 0 10px 30px rgba(0,0,0,.35); }
-  .free { left: 340px; top: 30px; width: 130px; height: 64px; border-color: rgba(52,211,153,.75); }
-  .paid { left: 340px; top: 206px; width: 130px; height: 64px; border-color: rgba(251,191,36,.7); }
-  .free::before, .paid::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
-  .free::before { background: #34d399; } .paid::before { background: #fbbf24; }
-  svg { position: absolute; inset: 0; overflow: visible; }
+  .flow svg { display: block; width: 470px; height: 300px; overflow: visible; }
 </style></head>
 <body>
   <div class="grid"></div>
@@ -48,17 +40,42 @@
     </div>
   </div>
   <div class="flow">
-    <svg viewBox="0 0 470 300">
-      <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#64748b"/></marker></defs>
-      <path d="M130 150 L171 150" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#a)"/>
-      <path d="M295 140 C 320 140, 316 62, 336 62" stroke="#34d399" stroke-width="2.5" fill="none" marker-end="url(#a)"/>
-      <path d="M295 160 C 320 160, 316 238, 336 238" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#a)"/>
-      <text x="250" y="108" fill="#34d399" font-size="12" font-family="Segoe UI" font-weight="600">first</text>
-      <text x="222" y="204" fill="#fbbf24" font-size="12" font-family="Segoe UI" font-weight="600">if blocked</text>
+    <!-- one SVG for boxes, text and arrows, so every arrow tip lands exactly on its box edge -->
+    <svg viewBox="0 0 470 300" font-family="Segoe UI, system-ui, sans-serif">
+      <defs>
+        <marker id="tip-grey" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker>
+        <marker id="tip-green" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#34d399"/></marker>
+        <marker id="tip-amber" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+        <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#000" flood-opacity=".45"/></filter>
+      </defs>
+
+      <!-- edges (drawn first; each ends exactly on the target box's left edge) -->
+      <path d="M130 150 H172" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#tip-grey)"/>
+      <path d="M292 140 C 318 140, 314 66, 340 66" stroke="#34d399" stroke-width="2.5" fill="none" marker-end="url(#tip-green)"/>
+      <path d="M292 160 C 318 160, 314 234, 340 234" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#tip-amber)"/>
+      <text x="300" y="104" text-anchor="end" font-size="12.5" font-weight="700" fill="#34d399">first</text>
+      <text x="300" y="207" text-anchor="end" font-size="12.5" font-weight="700" fill="#fbbf24">if blocked</text>
+
+      <!-- boxes -->
+      <rect x="167" y="113" width="130" height="74" rx="18" fill="none" stroke="#2dd4bf" stroke-opacity=".16" stroke-width="7"/>
+      <g filter="url(#shadow)" fill="#0f172a">
+        <rect x="0.5" y="118.5" width="129" height="63" rx="14" stroke="#94a3b8" stroke-opacity=".4"/>
+        <rect x="172.5" y="118.5" width="119" height="63" rx="14" stroke="#2dd4bf" stroke-opacity=".85"/>
+        <rect x="340.5" y="34.5" width="129" height="63" rx="14" stroke="#34d399" stroke-opacity=".85"/>
+        <rect x="340.5" y="202.5" width="129" height="63" rx="14" stroke="#fbbf24" stroke-opacity=".8"/>
+      </g>
+
+      <!-- labels -->
+      <text x="65" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#e6edf3">AI agent</text>
+      <text x="65" y="167" text-anchor="middle" font-size="12.5" fill="#94a3b8">Claude, Cursor…</text>
+      <text x="232" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#e6edf3">MCP+</text>
+      <text x="232" y="167" text-anchor="middle" font-size="12.5" fill="#94a3b8">pipeline</text>
+      <circle cx="357" cy="61" r="4.5" fill="#34d399"/>
+      <text x="368" y="66" font-size="15" font-weight="600" fill="#e6edf3">Direct</text>
+      <text x="355" y="87" font-size="12.5" fill="#94a3b8">free, from you</text>
+      <circle cx="357" cy="229" r="4.5" fill="#fbbf24"/>
+      <text x="368" y="234" font-size="15" font-weight="600" fill="#e6edf3">Bright Data</text>
+      <text x="355" y="255" font-size="12.5" fill="#94a3b8">unblocker, billed</text>
     </svg>
-    <div class="node agent">AI agent<small>Claude, Cursor…</small></div>
-    <div class="node mcp">MCP+<small>pipeline</small></div>
-    <div class="node free">Direct<small>free, from you</small></div>
-    <div class="node paid">Bright Data<small>unblocker, billed</small></div>
   </div>
 </body></html>
