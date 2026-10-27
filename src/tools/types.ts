@@ -74,7 +74,7 @@ export interface ToolSpec<S extends z.ZodRawShape = z.ZodRawShape> {
   untrusted: boolean;
   /** Works without a Bright Data token (free mode). */
   free?: boolean;
-  handler(args: z.objectOutputType<S, z.ZodTypeAny>, ctx: ToolContext, svc: Services): Promise<ToolResult>;
+  handler(args: z.output<z.ZodObject<S>>, ctx: ToolContext, svc: Services): Promise<ToolResult>;
 }
 
 export const defineTool = <S extends z.ZodRawShape>(spec: ToolSpec<S>): ToolSpec<S> => spec;

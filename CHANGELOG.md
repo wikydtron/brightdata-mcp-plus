@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.1
+
+### Security
+- Upgraded `zod` from 3.x to 4.6.7 to fix [GHSA-mrhx-c7xc-m3w5](https://github.com/advisories/GHSA-mrhx-c7xc-m3w5)
+  (validating oversized constrained collections could exhaust memory). `npm audit --omit=dev` is clean again.
+
+### Fixed
+- `list_dataset_fields` declares a field's `type` and `description` as optional in its output schema, so clients that
+  check `structuredContent` (the MCP SDK client does) accept fields without a description.
+
+### Changed
+- Validation errors use zod 4's wording, e.g. `Invalid input: expected string, received undefined` instead of
+  `Required`, and `Too small: expected number to be >=1` for an out-of-range setting. What is accepted or rejected is
+  unchanged.
+- Advertised input schemas no longer say `additionalProperties: false`. Unknown arguments were always ignored, and
+  the schema now says so; nested filter groups in `search_dataset` are inlined instead of using a deep `$ref`.
+
 ## 1.2.0
 
 ### Added

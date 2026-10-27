@@ -188,6 +188,8 @@ test('cancelling a tool call aborts the upstream request', async () => {
 
 test('scraper catalog search, details, datasets, assistant and stats', async () => {
   const h = await connect(stub);
+  // like real clients, list first so the SDK client checks structuredContent against each outputSchema
+  await h.client.listTools();
   const found = await h.call('search_scrapers', { query: 'amazon reviews' });
   const sc = found.structuredContent as { results: Array<{ dataset_id: string }> };
   assert.equal(sc.results[0]!.dataset_id, 'gd_test2');
@@ -198,7 +200,7 @@ test('scraper catalog search, details, datasets, assistant and stats', async () 
   assert.match(h.text(missing), /Available methods: collect_by_url, discover_by_keyword/);
 
   const fields = (await h.call('list_dataset_fields', { dataset_id: 'gd_l1viktl72bvl7bjuj0' })).structuredContent as { fields: Array<{ name: string }> };
-  assert.deepEqual(fields.fields.map((f) => f.name), ['name']);
+  assert.deepEqual(fields.fields.map((f) => f.name), ['name', 'headline']);
   const search = JSON.parse(unwrap(h.text(await h.call('search_dataset', {
     dataset_id: 'gd_l1viktl72bvl7bjuj0', filter: { operator: 'and', filters: [{ name: 'name', operator: '=', value: 'Ada' }, { name: 'x', operator: 'is_null' }] },
   }))));

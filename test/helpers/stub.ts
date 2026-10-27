@@ -126,7 +126,7 @@ export async function startStub() {
           const prog = /^\/datasets\/v3\/progress\/(.+)$/.exec(p);
           if (prog) return send(res, 200, { snapshot_id: prog[1], status: 'ready', records: 2 });
           if (/^\/datasets\/[^/]+\/metadata$/.test(p)) {
-            return send(res, 200, { fields: { name: { type: 'text', description: 'Full name', active: true }, legacy: { type: 'text', active: false } } });
+            return send(res, 200, { fields: { name: { type: 'text', description: 'Full name', active: true }, legacy: { type: 'text', active: false }, headline: { type: 'text' } } });
           }
           if (/^\/datasets\/search\//.test(p)) return send(res, 200, { hits: [{ name: 'Ada' }], total_hits: 1, took: 3 });
           if (p === '/sophie/dialog' && req.method === 'POST') {

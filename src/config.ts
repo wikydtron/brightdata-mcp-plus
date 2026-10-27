@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DEFAULT_USER_AGENT } from './services/direct.js';
 
-export const VERSION = '1.2.0';
+export const VERSION = '1.2.1';
 export const PACKAGE_NAME = 'brightdata-mcp-plus';
 
 export interface RateLimit {
@@ -72,7 +72,7 @@ const bool = (value: string | undefined, fallback: boolean): boolean => {
 };
 
 const intInRange = (name: string, min: number, max: number) =>
-  z.coerce.number({ invalid_type_error: `${name} must be a number` }).int().min(min).max(max);
+  z.coerce.number({ error: (iss) => (iss.code === 'invalid_type' ? `${name} must be a number` : undefined) }).int().min(min).max(max);
 
 /** Parses `--flag value` and `--flag=value` style arguments. */
 export function parseArgs(argv: string[]): Record<string, string | true> {

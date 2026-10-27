@@ -23,8 +23,8 @@ test('config: defaults, upstream-compatible names and validation', () => {
   assert.equal(c.transport, 'http');
   assert.equal(c.httpPort, 8080);
   assert.equal(c.unlockerZone, 'mcp_unlocker');
-  assert.throws(() => loadConfig({ BASE_MAX_RETRIES: '9' }));
-  assert.throws(() => loadConfig({ MAX_CONCURRENCY: 'many' }));
+  assert.throws(() => loadConfig({ BASE_MAX_RETRIES: '9' }), /<=5/);
+  assert.throws(() => loadConfig({ MAX_CONCURRENCY: 'many' }), /MAX_CONCURRENCY must be a number/);
   assert.deepEqual(parseRateLimit('50/30m'), { limit: 50, windowMs: 1_800_000, display: '50/30m' });
   assert.throws(() => parseRateLimit('fast'));
 });

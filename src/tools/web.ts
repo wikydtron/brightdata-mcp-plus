@@ -208,7 +208,7 @@ export const extract = defineTool({
   input: {
     url: httpUrl,
     extraction_prompt: z.string().max(4000).optional().describe('What to extract'),
-    schema: z.record(z.any()).optional().describe('Optional JSON Schema the output must follow'),
+    schema: z.record(z.string(), z.any()).optional().describe('Optional JSON Schema the output must follow'),
     country,
     fresh,
   },

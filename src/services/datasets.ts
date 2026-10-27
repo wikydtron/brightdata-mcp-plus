@@ -23,7 +23,7 @@ const leafSchema = z.object({
     .describe('Value to compare against. Omit for is_null / is_not_null.'),
 }).superRefine((leaf, ctx) => {
   if (!NULLARY.has(leaf.operator) && leaf.value === undefined) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, message: `operator "${leaf.operator}" requires a value` });
+    ctx.addIssue({ code: 'custom', message: `operator "${leaf.operator}" requires a value` });
   }
 });
 
