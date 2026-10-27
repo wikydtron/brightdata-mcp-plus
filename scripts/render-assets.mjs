@@ -29,14 +29,18 @@ function demoHtml(run) {
     const host = r.url.replace(/^https?:\/\//, '');
     let mark = '<span class="ok">✔</span>';
     let note = '<span class="ok">fetched directly · free</span>';
-    if (!r.ok) {
-      const reason = /\(([^)]+)\)\s*$/.exec(r.note)?.[1] ?? '';
+    if (r.ok && /local headless browser/.test(r.note)) {
+      mark = '<span class="p">✔</span>';
+      note = '<span class="p">rendered in local Chrome · free</span>';
+    } else if (!r.ok) {
+      // last step of a chain like "needs_javascript > render:captcha"
+      const reason = (/\(([^)]+)\)\s*$/.exec(r.note)?.[1] ?? '').split(' > ').pop().replace(/^render:/, '');
       if (/private or local/.test(r.note)) {
         mark = '<span class="err">⛔</span>';
         note = '<span class="err">refused: cloud-metadata address (SSRF)</span>';
       } else {
         mark = '<span class="warn">↪</span>';
-        note = `<span class="warn">blocked: ${esc(reason)} → Bright Data</span>`;
+        note = `<span class="warn">bot wall (${esc(reason)}) → Bright Data</span>`;
       }
     }
     const chars = r.ok ? `${r.chars.toLocaleString('en-US')} ch` : '';
@@ -45,7 +49,7 @@ function demoHtml(run) {
   const f = run.stats.free;
   const billed = Object.values(run.stats.billable).reduce((a, b) => a + b, 0);
   return `<!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{margin:0;width:1280px;height:600px;overflow:hidden;background:#0b1020}
+  html,body{margin:0;width:1280px;height:680px;overflow:hidden;background:#0b1020}
   body{font-family:"Segoe UI",system-ui,sans-serif;display:flex;align-items:center;justify-content:center}
   .win{width:1200px;border-radius:14px;background:#0d1117;border:1px solid #30363d;box-shadow:0 30px 80px rgba(0,0,0,.55);overflow:hidden}
   .bar{height:40px;display:flex;align-items:center;gap:8px;padding:0 16px;background:#161b22;border-bottom:1px solid #30363d}
@@ -61,14 +65,14 @@ function demoHtml(run) {
   <div><span class="p">$</span> node scripts/live-smoke.mjs</div>
   <div class="dim">server ${esc(run.server.name)} ${esc(run.server.version)} · ${run.tools} tools · tool: scrape_as_markdown</div>
   ${rows}
-  <div class="sum"><span class="p">session_stats</span> → direct_fetches <span class="ok">${f.direct_fetches}</span> · fallbacks <span class="warn">${f.direct_misses}</span> · billed requests <span class="ok">${billed}</span> · cost <span class="ok">$0.00</span></div>
+  <div class="sum"><span class="p">session_stats</span> → direct <span class="ok">${f.direct_fetches}</span> · local renders <span class="p">${f.local_renders}</span> · fallbacks <span class="warn">${f.fallbacks}</span> · billed requests <span class="ok">${billed}</span> · cost <span class="ok">$0.00</span></div>
   </div></div></body></html>`;
 }
 
 const run = JSON.parse(readFileSync(join(src, 'live-run.json'), 'utf8'));
 writeFileSync(join(src, 'demo.html'), demoHtml(run));
 
-const jobs = [['banner', 1280, 420], ['architecture', 1280, 1010], ['fetch-flow', 1280, 610], ['demo', 1280, 600]];
+const jobs = [['banner', 1280, 420], ['architecture', 1280, 1010], ['fetch-flow', 1280, 650], ["demo", 1280, 680]];
 const profile = mkdtempSync(join(tmpdir(), 'render-assets-'));
 try {
   for (const [name, w, h] of jobs) {

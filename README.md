@@ -8,7 +8,7 @@
   <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square">
   <img alt="MCP SDK 1.32" src="https://img.shields.io/badge/MCP%20SDK-1.32-a78bfa?style=flat-square">
   <a href="https://github.com/wikydtron/brightdata-mcp-plus/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/wikydtron/brightdata-mcp-plus/actions/workflows/ci.yml/badge.svg"></a>
-  <img alt="61 tests" src="https://img.shields.io/badge/tests-61%20passing-34d399?style=flat-square">
+  <img alt="70 tests" src="https://img.shields.io/badge/tests-70%20passing-34d399?style=flat-square">
   <img alt="34 tools" src="https://img.shields.io/badge/tools-34-fbbf24?style=flat-square">
 </p>
 
@@ -43,20 +43,29 @@ SSRF guard, a built-in HTTP transport and a real test suite.
 ## Why it costs less
 
 Bright Data charges per request. Most pages an agent reads (docs, blogs, news, GitHub, package registries, Wikipedia)
-don't block ordinary requests, so paying a proxy network to fetch them is wasted money. This server fetches each page
-**directly from your machine first, for free**, and only sends it through Bright Data when the site actually blocks it
-(Cloudflare, DataDome, PerimeterX, CAPTCHAs, JavaScript-only pages). Repeated fetches come from a cache, also free.
+don't block ordinary requests, so paying a proxy network to fetch them is wasted money. This server tries two free
+routes first:
 
-<p align="center"><img src="assets/demo.png" alt="Live run: five real sites fetched directly for free, two bot walls detected, a cloud-metadata address refused" width="100%"></p>
+1. **Direct fetch** from your machine: plain HTTP, fast, works for most of the web.
+2. **Local headless Chrome** (or Edge) when the page is a JavaScript-only app shell: Spotify, Instagram, YouTube,
+   TikTok, Figma, Duolingo and other single-page apps render for free on your own browser.
+
+Only real bot walls (Cloudflare challenges, DataDome, PerimeterX, CAPTCHAs) go to Bright Data. Repeated fetches come
+from a cache, also free.
+
+<p align="center"><img src="assets/demo.png" alt="Live run: three sites fetched directly, four JavaScript apps rendered in local Chrome, two bot walls detected, a cloud-metadata address refused" width="100%"></p>
 
 That screenshot is a real run of [`scripts/live-smoke.mjs`](scripts/live-smoke.mjs) against live websites with no API
-token: five pages fetched for free, the Cloudflare challenge on G2 and the JavaScript-only Reddit page correctly
-detected (with a token these go to Bright Data automatically), and an attempt to read the cloud-metadata address
-refused by the SSRF guard. Every result tells the agent how it was fetched:
+token. Wikipedia, Hacker News and GitHub were fetched directly. Spotify, Instagram, YouTube and TikTok, which send an
+empty shell to plain HTTP clients, were rendered in a local headless Chrome and returned their real content
+(follower counts, bios, video and track lists). G2's Cloudflare challenge and Reddit's CAPTCHA were detected; with a
+token these go to Bright Data automatically. An attempt to read the cloud-metadata address was refused by the SSRF
+guard. Every result tells the agent how it was fetched:
 
 ```text
 [server] Fetched directly (free).
-[server] Fetched via Bright Data (billed): direct fetch was not usable (cloudflare_challenge).
+[server] Rendered in a local headless browser (free): the page needs JavaScript.
+[server] Fetched via Bright Data (billed): free routes were not usable (needs_javascript > render:captcha).
 [server] Served from cache (originally via free direct fetch; no cost).
 ```
 
@@ -68,7 +77,7 @@ Requires **Node.js 22+**.
 git clone https://github.com/wikydtron/brightdata-mcp-plus.git
 cd brightdata-mcp-plus
 npm install        # also builds (prepare script)
-npm test           # optional: 61 tests, ~5 s
+npm test           # optional: 70 tests, ~10 s
 ```
 
 Or run it straight from GitHub without cloning:
@@ -78,8 +87,9 @@ npx -y github:wikydtron/brightdata-mcp-plus --list-tools
 ```
 
 **Free mode (no account):** start it without `API_TOKEN`. You get `scrape_as_markdown`, `scrape_batch`,
-`scrape_as_html`, `extract` and `session_stats`, all fetching directly. Add `BROWSER_CDP_ENDPOINT` to drive your own
-local Chrome with the browser tools too.
+`scrape_as_html`, `extract` and `session_stats`, fetching directly and rendering JavaScript apps in your local Chrome
+or Edge (found automatically; set `CHROME_PATH` otherwise). Add `BROWSER_CDP_ENDPOINT` to drive your own Chrome with
+the interactive browser tools too.
 
 **Full mode:** set `API_TOKEN` to unlock search, scrapers, datasets, AI-insights and Bright Data's remote browsers,
 with direct-first fetching still saving requests. Check your token and zones first:
@@ -157,24 +167,33 @@ docker run -i --rm -e API_TOKEN=your_token brightdata-mcp-plus
 
 ## How page fetching works
 
-<p align="center"><img src="assets/fetch-flow.png" alt="Fetch decision flow: cache, proxy check, SSRF guard, direct GET, classifier, then return or fall back to Bright Data" width="100%"></p>
+<p align="center"><img src="assets/fetch-flow.png" alt="Fetch decision flow: cache, proxy check, SSRF guard, direct GET, classifier, local Chrome render for JavaScript shells, then return or fall back to Bright Data" width="100%"></p>
 
 | `FETCH_STRATEGY` | Behaviour | Cost |
 |---|---|---|
-| `auto` (default) | Direct first, Bright Data Web Unlocker when the site blocks, needs JavaScript or fails | Only blocked pages are billed |
-| `direct` | Direct only; blocked pages return an error with the reason | Never billed |
+| `auto` (default) | Direct, then local Chrome for JavaScript apps, then Bright Data Web Unlocker for bot walls and failures | Only bot-walled pages are billed |
+| `direct` | Direct and local Chrome only; blocked pages return an error with the reason | Never billed |
 | `brightdata` | Always Web Unlocker (upstream behaviour) | Every fetch billed |
 | *(no `API_TOKEN`)* | Free mode: `direct`, Bright Data tools hidden | Free |
 
 Details:
 - **Bot-wall detection** looks for Cloudflare challenges, DataDome, Imperva, PerimeterX, AWS WAF, Google's
   "unusual traffic" page, CAPTCHA widgets and JavaScript-only shells. CAPTCHA keywords only count on short pages, so
-  an article with a reCAPTCHA contact form is still fetched for free.
-- **Host memory:** a host that blocked once goes straight to Bright Data for 30 minutes, so you don't wait for a
-  doomed direct attempt.
+  an article with a reCAPTCHA contact form is still fetched for free. Rendered pages are classified again, so a bot
+  wall that only appears after JavaScript runs is still caught.
+- **Local rendering** uses your installed Chrome or Edge through `playwright-core` (no browser download). One
+  headless browser is shared by all sessions, each render gets a fresh incognito context, images, media and fonts
+  are skipped, and the browser closes after 2 idle minutes. A render finishes as soon as the app has produced text
+  or its network goes quiet, so an empty shell fails over in about a second instead of waiting out a timeout. It renders pages; it does not try to
+  evade bot detection, so walls still go to Bright Data, which exists for that.
+- **Host memory:** for 30 minutes, a host that needed rendering skips the direct attempt, and a host that blocked
+  goes straight to Bright Data.
 - **Country routing** (`country: "de"`) always uses Bright Data, since geo-targeting needs a proxy.
 - Direct fetches follow up to 5 redirects, decode gzip/deflate/brotli, honour the page charset, stop at 15 s and
   10 MB, and convert HTML to Markdown with absolute links.
+- **Limits:** apps that keep streaming data after the first paint (Google Maps, live trading charts) may render only
+  their UI chrome. For structured data from those, use a pre-built scraper (`search_scrapers "google maps"`) or the
+  interactive `scraping_browser_*` tools.
 
 ## Tools (34)
 
@@ -236,7 +255,12 @@ All settings are environment variables (names compatible with `@brightdata/mcp`)
 | `FETCH_STRATEGY` | `auto` | `auto`, `direct` or `brightdata` (see above) |
 | `DIRECT_TIMEOUT` / `DIRECT_MAX_BYTES` | `15` s / `10000000` | Limits for direct fetches |
 | `DIRECT_USER_AGENT` | Chrome UA | User-Agent for direct fetches |
-| `DIRECT_ALLOW_PRIVATE` | `false` | Allow direct fetches of localhost/LAN addresses |
+| `DIRECT_ALLOW_PRIVATE` | `false` | Allow direct fetches and renders of localhost/LAN addresses |
+| `LOCAL_RENDER` | `on` | Render JavaScript apps in local Chrome/Edge before paying Bright Data (`off` to disable) |
+| `CHROME_PATH` | auto | Browser executable if Chrome/Edge isn't in its standard location |
+| `LOCAL_RENDER_TIMEOUT` / `LOCAL_RENDER_IDLE` | `25` s / `120` s | Per-render limit; close the browser after this idle time |
+| `LOCAL_RENDER_ON` | `needs_javascript,empty` | Direct-fetch results that trigger a local render |
+| `LOCAL_RENDER_CONCURRENCY` | `2` | Parallel renders |
 | `WEB_UNLOCKER_ZONE` / `BROWSER_ZONE` | `mcp_unlocker` / `mcp_browser` | Zone names |
 | `AUTO_CREATE_ZONES` | `true` | Create missing zones at startup |
 | `GROUPS` / `TOOLS` | all | Limit tools; legacy `web_data_*` names map to the new tools |
@@ -269,9 +293,10 @@ All settings are environment variables (names compatible with `@brightdata/mcp`)
 ```json
 {
   "fetch_strategy": "auto",
+  "local_rendering": "on",
   "billable": { "unlocker_requests": 3, "scraper_records": 10, "dataset_records": 0, "browser_navigations": 0 },
   "estimated_cost_usd": 0.0195,
-  "free": { "direct_fetches": 42, "direct_misses": 3, "estimated_savings_usd": 0.063 },
+  "free": { "direct_fetches": 42, "local_renders": 9, "fallbacks": 3, "estimated_savings_usd": 0.0765 },
   "budget": { "max": 500, "used": 13, "remaining": 487 },
   "tools": { "scrape_as_markdown": { "calls": 45, "errors": 0, "cache_hits": 6, "p50_ms": 410, "p95_ms": 1890 } }
 }
@@ -283,7 +308,7 @@ All settings are environment variables (names compatible with `@brightdata/mcp`)
 |---|---|
 | Prompt injection in web content | Every web result is wrapped between `=====UNTRUSTED_<random nonce>_BEGIN/END=====` markers with a notice; forged markers are scrubbed |
 | Pages telling the agent to change its MCP config | Content gate: matching content is withheld unless the user approves it through MCP elicitation |
-| SSRF (agent tricked into reading `169.254.169.254`, your router, local services) | Direct fetches resolve DNS and refuse private, loopback, link-local and metadata ranges on every redirect hop |
+| SSRF (agent tricked into reading `169.254.169.254`, your router, local services) | Direct fetches resolve DNS and refuse private, loopback, link-local and metadata ranges on every redirect hop; the local renderer only opens URLs whose redirect chain passed that check, blocks every in-page request to those ranges, and discards a page that ends up on one |
 | Credential leaks | API token, zone passwords and URL credentials are redacted from logs and errors; the token is never put in a URL |
 | Ambiguous browser refs | A ref that appears more than once in the snapshot (e.g. echoed by page text) is refused |
 | Exposed HTTP server | Loopback by default, DNS-rebinding protection, `HTTP_AUTH_SECRET` required for shared tokens on public interfaces |
@@ -299,8 +324,9 @@ src/
   server.ts           createSession(): one isolated McpServer + services; the tool pipeline
   http/client.ts      The only path to the Bright Data API: auth, timeouts, retries, concurrency, typed errors
   http/server.ts      Streamable HTTP transport with per-session isolation
-  services/           pages (direct-first), direct (SSRF-safe fetch + classifier), unlocker, serp,
-                      scrapers, datasets, assistant, browser, zones
+  services/           pages (direct → render → Bright Data), direct (SSRF-safe fetch + classifier),
+                      render (local headless Chrome), unlocker, serp, scrapers, datasets, assistant,
+                      browser, zones
   tools/              Tool definitions (zod schemas, annotations), grouped by area
   security/           Untrusted-content wrapping, prompt-injection content gate
   usage.ts            Stats, budget reservations, rate limiting, savings
@@ -311,7 +337,7 @@ src/
 
 | Area | `@brightdata/mcp` 4.1.0 | brightdata-mcp-plus |
 |---|---|---|
-| Page fetching | Every fetch billed | Direct first for free, Bright Data only when blocked; free mode with no account |
+| Page fetching | Every fetch billed | Direct, then local headless Chrome for JavaScript apps (both free), Bright Data only for bot walls; free mode with no account |
 | Language | ~2.8k lines of untyped JS | Strict TypeScript, layered |
 | Timeouts | None by default; two tools ignore `BASE_TIMEOUT` | Every call (90 s default) |
 | Retries | Off by default, no backoff | Jittered backoff, `Retry-After`, never re-triggers billed jobs |
@@ -326,13 +352,13 @@ src/
 | HTTP | Hosted only, token in URL | Built in, header auth, per-session isolation |
 | SSRF protection | n/a | Private-range guard on every hop |
 | Docker | Image copies 3 of 15 modules | Multi-stage, non-root, healthcheck |
-| Tests | Unit and stub tests | 61: unit, fake Bright Data API, real MCP clients over in-memory/stdio/HTTP, real headless Chrome |
+| Tests | Unit and stub tests | 70: unit, fake Bright Data API, real MCP clients over in-memory/stdio/HTTP, real headless Chrome (CDP and local rendering) |
 
 ## Development
 
 ```bash
 npm run build          # tsc
-npm test               # build + 61 tests (browser test uses local Chrome/Edge if found)
+npm test               # build + 70 tests (browser and render tests use local Chrome/Edge if found)
 npm run typecheck
 node scripts/live-smoke.mjs                                 # real sites, free mode, no cost
 node scripts/live-smoke.mjs --json assets/src/live-run.json # refresh demo data
@@ -341,17 +367,23 @@ node scripts/render-assets.mjs                              # re-render README i
 
 Test suites: `unit` (config, cache, semaphore, errors, security, SERP, pagination, scoring, budget),
 `client` (retries, Retry-After, timeouts, cancellation, headers), `e2e` (all tool families through a real MCP client),
-`direct` (direct fetching, bot-wall detection, fallback, SSRF, free mode), `http` (multi-tenant HTTP),
+`direct` (direct fetching, bot-wall detection, fallback, SSRF, free mode), `render` (local Chrome: client-rendered
+pages, XHR, walls that appear after JavaScript, host memory, in-browser SSRF guard), `http` (multi-tenant HTTP),
 `stdio` (the built CLI as a subprocess) and `browser` (a real headless Chrome over CDP).
 
 ## FAQ
 
-**Is it free?** Fetching pages directly is free. Bright Data's own services (search, scrapers, unblocking protected
-sites, remote browsers) run on their infrastructure and are billed to your Bright Data account; their free tier is
-5,000 requests a month. This server just makes sure you only use them when needed.
+**Is it free?** Fetching pages directly and rendering them in your own Chrome is free. Bright Data's own services
+(search, scrapers, unblocking protected sites, remote browsers) run on their infrastructure and are billed to your
+Bright Data account; their free tier is 5,000 requests a month. This server just makes sure you only use them when
+needed.
 
-**Why did a page cost a request?** The result note says why, e.g. `cloudflare_challenge` or `needs_javascript`.
-Use `FETCH_STRATEGY=direct` to never pay, at the cost of failing on protected sites.
+**Why did a page cost a request?** The result note says why, e.g. `cloudflare_challenge` or
+`needs_javascript > render:captcha` (a JavaScript app that showed a CAPTCHA even to a real browser). Use
+`FETCH_STRATEGY=direct` to never pay, at the cost of failing on protected sites.
+
+**Do I need Chrome?** No. Without Chrome or Edge the render step is skipped (`session_stats` shows
+`local_rendering: "unavailable"`) and JavaScript apps go to Bright Data as before.
 
 **Is direct fetching allowed?** It's an ordinary HTTP request from your machine, like a browser. You are responsible
 for respecting each site's terms and robots rules.

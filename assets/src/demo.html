@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset="utf-8"><style>
-  html,body{margin:0;width:1280px;height:600px;overflow:hidden;background:#0b1020}
+  html,body{margin:0;width:1280px;height:680px;overflow:hidden;background:#0b1020}
   body{font-family:"Segoe UI",system-ui,sans-serif;display:flex;align-items:center;justify-content:center}
   .win{width:1200px;border-radius:14px;background:#0d1117;border:1px solid #30363d;box-shadow:0 30px 80px rgba(0,0,0,.55);overflow:hidden}
   .bar{height:40px;display:flex;align-items:center;gap:8px;padding:0 16px;background:#161b22;border-bottom:1px solid #30363d}
@@ -13,14 +13,16 @@
   <div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="t">live run on real websites · free mode (no API token) · with a token, blocked sites fall back to Bright Data</span></div>
   <div class="body">
   <div><span class="p">$</span> node scripts/live-smoke.mjs</div>
-  <div class="dim">server brightdata-mcp-plus 1.1.0 · 5 tools · tool: scrape_as_markdown</div>
-  <div class="row"><span class="ok">✔</span><span class="ms">529 ms</span><span class="ch">1,952 ch</span><span class="url">en.wikipedia.org/wiki/Model_Context_Protocol</span><span class="ok">fetched directly · free</span></div>
-<div class="row"><span class="ok">✔</span><span class="ms">384 ms</span><span class="ch">2,005 ch</span><span class="url">developer.mozilla.org/en-US/docs/Web/HTTP/Status/429</span><span class="ok">fetched directly · free</span></div>
-<div class="row"><span class="ok">✔</span><span class="ms">436 ms</span><span class="ch">2,092 ch</span><span class="url">news.ycombinator.com/</span><span class="ok">fetched directly · free</span></div>
-<div class="row"><span class="ok">✔</span><span class="ms">513 ms</span><span class="ch">2,081 ch</span><span class="url">github.com/modelcontextprotocol/servers</span><span class="ok">fetched directly · free</span></div>
-<div class="row"><span class="ok">✔</span><span class="ms">388 ms</span><span class="ch">2,091 ch</span><span class="url">registry.npmjs.org/@modelcontextprotocol/sdk/latest</span><span class="ok">fetched directly · free</span></div>
-<div class="row"><span class="warn">↪</span><span class="ms">156 ms</span><span class="ch"></span><span class="url">www.g2.com/products/notion/reviews</span><span class="warn">blocked: cloudflare_challenge → Bright Data</span></div>
-<div class="row"><span class="warn">↪</span><span class="ms">75 ms</span><span class="ch"></span><span class="url">www.reddit.com/r/mcp/</span><span class="warn">blocked: needs_javascript → Bright Data</span></div>
-<div class="row"><span class="err">⛔</span><span class="ms">0 ms</span><span class="ch"></span><span class="url">169.254.169.254/latest/meta-data/</span><span class="err">refused: cloud-metadata address (SSRF)</span></div>
-  <div class="sum"><span class="p">session_stats</span> → direct_fetches <span class="ok">5</span> · fallbacks <span class="warn">2</span> · billed requests <span class="ok">0</span> · cost <span class="ok">$0.00</span></div>
+  <div class="dim">server brightdata-mcp-plus 1.2.0 · 5 tools · tool: scrape_as_markdown</div>
+  <div class="row"><span class="ok">✔</span><span class="ms">537 ms</span><span class="ch">1,952 ch</span><span class="url">en.wikipedia.org/wiki/Model_Context_Protocol</span><span class="ok">fetched directly · free</span></div>
+<div class="row"><span class="ok">✔</span><span class="ms">344 ms</span><span class="ch">2,092 ch</span><span class="url">news.ycombinator.com/</span><span class="ok">fetched directly · free</span></div>
+<div class="row"><span class="ok">✔</span><span class="ms">540 ms</span><span class="ch">2,081 ch</span><span class="url">github.com/modelcontextprotocol/servers</span><span class="ok">fetched directly · free</span></div>
+<div class="row"><span class="p">✔</span><span class="ms">3863 ms</span><span class="ch">2,092 ch</span><span class="url">open.spotify.com/artist/0TnOYISbd1XYRBk9myaseg</span><span class="p">rendered in local Chrome · free</span></div>
+<div class="row"><span class="p">✔</span><span class="ms">2401 ms</span><span class="ch">2,077 ch</span><span class="url">www.instagram.com/nasa/</span><span class="p">rendered in local Chrome · free</span></div>
+<div class="row"><span class="p">✔</span><span class="ms">3900 ms</span><span class="ch">2,027 ch</span><span class="url">www.youtube.com/@Google</span><span class="p">rendered in local Chrome · free</span></div>
+<div class="row"><span class="p">✔</span><span class="ms">10314 ms</span><span class="ch">2,065 ch</span><span class="url">www.tiktok.com/@nasa</span><span class="p">rendered in local Chrome · free</span></div>
+<div class="row"><span class="warn">↪</span><span class="ms">157 ms</span><span class="ch"></span><span class="url">www.g2.com/products/notion/reviews</span><span class="warn">bot wall (cloudflare_challenge) → Bright Data</span></div>
+<div class="row"><span class="warn">↪</span><span class="ms">1786 ms</span><span class="ch"></span><span class="url">www.reddit.com/r/mcp/</span><span class="warn">bot wall (captcha) → Bright Data</span></div>
+<div class="row"><span class="err">⛔</span><span class="ms">1 ms</span><span class="ch"></span><span class="url">169.254.169.254/latest/meta-data/</span><span class="err">refused: cloud-metadata address (SSRF)</span></div>
+  <div class="sum"><span class="p">session_stats</span> → direct <span class="ok">3</span> · local renders <span class="p">4</span> · fallbacks <span class="warn">2</span> · billed requests <span class="ok">0</span> · cost <span class="ok">$0.00</span></div>
   </div></div></body></html>

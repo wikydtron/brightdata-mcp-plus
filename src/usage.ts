@@ -31,7 +31,8 @@ export class UsageMeter {
   private reserved = 0;
   private callTimes: number[] = [];
   private directFetches = 0;
-  private directMisses = 0;
+  private localRenders = 0;
+  private fallbacks = 0;
   readonly startedAt = Date.now();
 
   constructor(private readonly opts: {
@@ -91,10 +92,11 @@ export class UsageMeter {
     if (s.latencies.length > LATENCY_WINDOW) s.latencies.shift();
   }
 
-  /** A free direct fetch that worked (true) or had to be abandoned (false). */
-  recordDirect(ok: boolean): void {
-    if (ok) this.directFetches++;
-    else this.directMisses++;
+  /** How a page fetch ended: free direct, free local render, or past the free routes. */
+  recordFetch(outcome: 'direct' | 'local_render' | 'fallback'): void {
+    if (outcome === 'direct') this.directFetches++;
+    else if (outcome === 'local_render') this.localRenders++;
+    else this.fallbacks++;
   }
 
   totalBillable(): number {
@@ -109,8 +111,9 @@ export class UsageMeter {
       estimated_cost_usd: Number(((billableResults / 1000) * this.opts.pricePer1k).toFixed(4)),
       free: {
         direct_fetches: this.directFetches,
-        direct_misses: this.directMisses,
-        estimated_savings_usd: Number(((this.directFetches / 1000) * this.opts.pricePer1k).toFixed(4)),
+        local_renders: this.localRenders,
+        fallbacks: this.fallbacks,
+        estimated_savings_usd: Number((((this.directFetches + this.localRenders) / 1000) * this.opts.pricePer1k).toFixed(4)),
       },
       budget: this.opts.budgetMaxRequests > 0
         ? { max: this.opts.budgetMaxRequests, used: billableResults, remaining: Math.max(0, this.opts.budgetMaxRequests - billableResults) }

@@ -1,7 +1,7 @@
 <!doctype html>
 <html><head><meta charset="utf-8"><title>fetch flow</title>
 <style>
-  html, body { margin: 0; width: 1280px; height: 610px; overflow: hidden; }
+  html, body { margin: 0; width: 1280px; height: 650px; overflow: hidden; }
   body { font-family: "Segoe UI", system-ui, sans-serif; color: #e6edf3; background: #0d1117; position: relative; }
   h2 { position: absolute; left: 40px; top: 30px; margin: 0; font-size: 26px; }
   h2 small { font-size: 15px; font-weight: 500; color: #8b949e; margin-left: 12px; }
@@ -13,51 +13,64 @@
   .lbl { font: 600 12.5px "Segoe UI", sans-serif; }
 </style></head>
 <body>
-  <h2>How a page is fetched <small>FETCH_STRATEGY=auto (default)</small></h2>
-  <svg viewBox="0 0 1280 560">
+  <h2>How a page is fetched <small>FETCH_STRATEGY=auto (default): free routes first, Bright Data last</small></h2>
+  <svg viewBox="0 0 1280 650">
     <defs>
-      <marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6e7681"/></marker>
-      <marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
-      <marker id="mr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
-      <marker id="mg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#34d399"/></marker>
+      <marker id="m" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8b949e"/></marker>
+      <marker id="ma" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/></marker>
+      <marker id="mr" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#f87171"/></marker>
+      <marker id="mg" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#34d399"/></marker>
     </defs>
     <g stroke-width="2" fill="none">
-      <path d="M188 170 L236 170" stroke="#6e7681" marker-end="url(#m)"/>
-      <path d="M406 170 L454 170" stroke="#6e7681" marker-end="url(#m)"/>
-      <path d="M624 170 L672 170" stroke="#6e7681" marker-end="url(#m)"/>
-      <path d="M842 170 L890 170" stroke="#6e7681" marker-end="url(#m)"/>
-      <path d="M1060 170 L1108 170" stroke="#34d399" marker-end="url(#mg)"/>
-      <path d="M321 222 L321 392 L890 392" stroke="#fbbf24" marker-end="url(#ma)"/>
-      <path d="M757 222 L757 392" stroke="#fbbf24"/>
-      <path d="M539 222 L539 262" stroke="#f87171" marker-end="url(#mr)"/>
-      <path d="M975 222 L975 262" stroke="#fbbf24" marker-end="url(#ma)"/>
-      <path d="M975 328 L975 356" stroke="#fbbf24" marker-end="url(#ma)"/>
+      <!-- main row -->
+      <path d="M188 170 H236" stroke="#8b949e" marker-end="url(#m)"/>
+      <path d="M406 170 H454" stroke="#8b949e" marker-end="url(#m)"/>
+      <path d="M624 170 H672" stroke="#8b949e" marker-end="url(#m)"/>
+      <path d="M842 170 H890" stroke="#8b949e" marker-end="url(#m)"/>
+      <path d="M1060 170 H1108" stroke="#34d399" marker-end="url(#mg)"/>
+      <!-- refuse -->
+      <path d="M539 220 V264" stroke="#f87171" marker-end="url(#mr)"/>
+      <!-- JS shell: classify -> local render -->
+      <path d="M1060 205 H1084 V300 H1108" stroke="#34d399" marker-end="url(#mg)"/>
+      <!-- local render -> return -->
+      <path d="M1175 268 V220" stroke="#34d399" marker-end="url(#mg)"/>
+      <!-- bot wall: classify -> bright data -->
+      <path d="M975 220 V384" stroke="#fbbf24" marker-end="url(#ma)"/>
+      <!-- render still blocked -> bright data -->
+      <path d="M1175 332 V417 H1060" stroke="#fbbf24" marker-end="url(#ma)"/>
+      <!-- bus: proxy needed / direct failed -> bright data -->
+      <path d="M321 220 V417 H890" stroke="#fbbf24" marker-end="url(#ma)"/>
+      <path d="M757 220 V417" stroke="#fbbf24"/>
     </g>
     <text class="lbl" x="196" y="160" fill="#8b949e">miss</text>
     <text class="lbl" x="420" y="160" fill="#8b949e">no</text>
     <text class="lbl" x="632" y="160" fill="#8b949e">public</text>
     <text class="lbl" x="854" y="160" fill="#8b949e">200</text>
     <text class="lbl" x="1066" y="160" fill="#34d399">clean</text>
-    <text class="lbl" x="331" y="246" fill="#fbbf24">yes: country or blocked host</text>
-    <text class="lbl" x="549" y="246" fill="#f87171">private / LAN / metadata</text>
+    <text class="lbl" x="331" y="246" fill="#fbbf24">yes: country, or host blocked</text>
+    <text class="lbl" x="549" y="246" fill="#f87171">private / metadata</text>
     <text class="lbl" x="767" y="246" fill="#fbbf24">4xx · 5xx · timeout</text>
-    <text class="lbl" x="985" y="246" fill="#fbbf24">bot wall / JS shell</text>
+    <text class="lbl" x="1092" y="254" fill="#34d399">JS shell</text>
+    <text class="lbl" x="1183" y="250" fill="#34d399">content</text>
+    <text class="lbl" x="985" y="330" fill="#fbbf24">bot wall</text>
+    <text class="lbl" x="1078" y="406" fill="#fbbf24">still blocked</text>
   </svg>
   <div class="n t" style="left:38px; top:120px; width:150px; height:100px;">Cache<small>hit = free</small></div>
   <div class="n q" style="left:236px; top:120px; width:170px; height:100px;">Needs a proxy?<small>country set, or host blocked recently</small></div>
   <div class="n q" style="left:454px; top:120px; width:170px; height:100px;">SSRF guard<small>resolve DNS, check every redirect hop</small></div>
-  <div class="n g" style="left:672px; top:120px; width:170px; height:100px;">Direct GET<small>gzip/br, redirects, 15 s, 10 MB</small></div>
-  <div class="n q" style="left:890px; top:120px; width:170px; height:100px;">Classify<small>Cloudflare, DataDome, PerimeterX, captcha, JS shell</small></div>
+  <div class="n g" style="left:672px; top:120px; width:170px; height:100px;">Direct GET<small>free · gzip/br, redirects, 15 s, 10 MB</small></div>
+  <div class="n q" style="left:890px; top:120px; width:170px; height:100px;">Classify<small>content, JavaScript shell, or bot wall?</small></div>
   <div class="n g" style="left:1108px; top:120px; width:134px; height:100px;">Return<small>free · cached</small></div>
   <div class="n r" style="left:454px; top:264px; width:170px; height:62px;">Refuse<small>never sent anywhere</small></div>
-  <div class="n a" style="left:890px; top:264px; width:170px; height:62px;">Remember host<small>skip direct for 30 min</small></div>
-  <div class="n a" style="left:890px; top:358px; width:170px; height:66px;">Bright Data<small>Web Unlocker · billed</small></div>
-  <div class="n" style="left:38px; top:452px; width:1204px; text-align:left; border-style:dashed; font-weight:500; display:block;">
+  <div class="n g" style="left:1108px; top:268px; width:134px; height:64px;">Local Chrome<small>free · headless render</small></div>
+  <div class="n a" style="left:890px; top:384px; width:170px; height:66px;">Bright Data<small>Web Unlocker · billed</small></div>
+  <div class="n" style="left:38px; top:478px; width:1204px; text-align:left; border-style:dashed; font-weight:500; display:block;">
     <div>Every result ends with a trusted note, for example:</div>
     <div style="font:600 13.5px/1.75 'Cascadia Code', Consolas, monospace; margin-top:4px;">
-      <span style="color:#34d399">[server] Fetched directly (free).</span><br>
-      <span style="color:#fbbf24">[server] Fetched via Bright Data (billed): direct fetch was not usable (cloudflare_challenge).</span>
+      <span style="color:#34d399">[server] Fetched directly (free).</span> &nbsp;
+      <span style="color:#34d399">[server] Rendered in a local headless browser (free): the page needs JavaScript.</span><br>
+      <span style="color:#fbbf24">[server] Fetched via Bright Data (billed): free routes were not usable (needs_javascript &gt; render:captcha).</span>
     </div>
-    <small>FETCH_STRATEGY=direct never bills · FETCH_STRATEGY=brightdata always uses Web Unlocker · no API_TOKEN = free mode</small>
+    <small>Hosts are remembered for 30 min (rendered hosts skip the direct try, blocked hosts go straight to Bright Data) · FETCH_STRATEGY=direct never bills · no API_TOKEN = free mode</small>
   </div>
 </body></html>

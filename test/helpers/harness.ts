@@ -23,7 +23,7 @@ export async function connect(stub: Stub, env: Record<string, string> = {}, caps
   const redactor = new Redactor();
   const config = loadConfig({
     API_TOKEN: 'e2e-token', BRIGHTDATA_API_URL: stub.url, BRIGHTDATA_DOCS_URL: stub.url, LOG_LEVEL: 'silent',
-    FETCH_STRATEGY: 'brightdata', ...env,
+    FETCH_STRATEGY: 'brightdata', LOCAL_RENDER: 'off', ...env,
   });
   const session = createSession({ config, token: config.apiToken, logger: createLogger('silent', redactor), redactor, backoffBaseMs: 5, pollMs: 20 });
   const client = new Client({ name: 'e2e-client', version: '1.0.0' }, {

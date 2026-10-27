@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DEFAULT_USER_AGENT } from './services/direct.js';
 
-export const VERSION = '1.1.0';
+export const VERSION = '1.2.0';
 export const PACKAGE_NAME = 'brightdata-mcp-plus';
 
 export interface RateLimit {
@@ -22,6 +22,12 @@ export interface Config {
   directMaxBytes: number;
   directUserAgent: string;
   directAllowPrivate: boolean;
+  localRender: boolean;
+  chromePath: string | undefined;
+  localRenderTimeoutMs: number;
+  localRenderOn: string[];
+  localRenderIdleMs: number;
+  localRenderConcurrency: number;
   groups: string[];
   tools: string[];
   rateLimit: RateLimit | null;
@@ -112,6 +118,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, argv: string[] 
     directMaxBytes: intInRange('DIRECT_MAX_BYTES', 10_000, 100_000_000).parse(env.DIRECT_MAX_BYTES ?? 10_000_000),
     directUserAgent: env.DIRECT_USER_AGENT?.trim() || DEFAULT_USER_AGENT,
     directAllowPrivate: bool(env.DIRECT_ALLOW_PRIVATE, false),
+    localRender: bool(env.LOCAL_RENDER, true),
+    chromePath: env.CHROME_PATH?.trim() || undefined,
+    localRenderTimeoutMs: seconds('LOCAL_RENDER_TIMEOUT', 25, 3, 300, env.LOCAL_RENDER_TIMEOUT),
+    localRenderOn: list(env.LOCAL_RENDER_ON ?? 'needs_javascript,empty'),
+    localRenderIdleMs: seconds('LOCAL_RENDER_IDLE', 120, 5, 86_400, env.LOCAL_RENDER_IDLE),
+    localRenderConcurrency: intInRange('LOCAL_RENDER_CONCURRENCY', 1, 16).parse(env.LOCAL_RENDER_CONCURRENCY ?? 2),
     apiBaseUrl: (env.BRIGHTDATA_API_URL ?? 'https://api.brightdata.com').replace(/\/+$/, ''),
     docsBaseUrl: (env.BRIGHTDATA_DOCS_URL ?? 'https://docs.brightdata.com').replace(/\/+$/, ''),
     unlockerZone: env.WEB_UNLOCKER_ZONE?.trim() || 'mcp_unlocker',

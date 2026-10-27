@@ -12,6 +12,7 @@ import { wrapUntrusted } from './security/untrusted.js';
 import { BrowserManager } from './services/browser.js';
 import { DatasetService } from './services/datasets.js';
 import { PageFetcher } from './services/pages.js';
+import { sharedRenderer } from './services/render.js';
 import { ScraperCatalog, ScraperRunner } from './services/scrapers.js';
 import { Unlocker } from './services/unlocker.js';
 import { ensureZones, type ZoneReport } from './services/zones.js';
@@ -105,6 +106,14 @@ export function createSession(opts: SessionOptions): Session {
         timeoutMs: config.directTimeoutMs, maxBytes: config.directMaxBytes,
         userAgent: config.directUserAgent, allowPrivate: config.directAllowPrivate,
       },
+      render: config.localRender ? {
+        renderer: sharedRenderer({
+          executablePath: config.chromePath, idleMs: config.localRenderIdleMs,
+          concurrency: config.localRenderConcurrency, logger: opts.logger,
+        }),
+        on: new Set(config.localRenderOn),
+        timeoutMs: config.localRenderTimeoutMs,
+      } : null,
       unlocker: freeMode ? null : unlocker,
       meter, logger, cacheTtlMs: config.cacheTtlMs, cacheMaxEntries: config.cacheMaxEntries,
     }),

@@ -100,7 +100,8 @@ export const sessionStats = defineTool({
     fetch_strategy: z.string(),
     billable: z.record(z.number()),
     estimated_cost_usd: z.number(),
-    free: z.object({ direct_fetches: z.number(), direct_misses: z.number(), estimated_savings_usd: z.number() }),
+    free: z.object({ direct_fetches: z.number(), local_renders: z.number(), fallbacks: z.number(), estimated_savings_usd: z.number() }),
+    local_rendering: z.string(),
     budget: z.object({ max: z.number(), used: z.number(), remaining: z.number() }).nullable(),
     tools: z.record(z.object({ calls: z.number(), errors: z.number(), cache_hits: z.number(), p50_ms: z.number(), p95_ms: z.number() })),
     cache: z.object({ entries: z.number(), hits: z.number(), misses: z.number() }),
@@ -116,6 +117,7 @@ export const sessionStats = defineTool({
     const structured = {
       ...svc.meter.snapshot(),
       fetch_strategy: svc.pages.strategy,
+      local_rendering: !svc.config.localRender ? 'off' : svc.pages.renderingEnabled ? 'on' : 'unavailable (no Chrome/Edge found)',
       cache: {
         entries: caches.reduce((n, c) => n + c.size, 0),
         hits: caches.reduce((n, c) => n + c.hits, 0),

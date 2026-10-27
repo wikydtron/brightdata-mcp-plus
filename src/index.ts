@@ -5,6 +5,7 @@ import { BrightDataClient } from './http/client.js';
 import { startHttpServer } from './http/server.js';
 import { createLogger, type Logger } from './logger.js';
 import { createSession } from './server.js';
+import { disposeSharedRenderer } from './services/render.js';
 import { ensureZones } from './services/zones.js';
 import { ALL_TOOLS, GROUPS } from './tools/index.js';
 import { Redactor } from './util/redact.js';
@@ -79,6 +80,7 @@ async function main(): Promise<void> {
     const stop = async (signal: string) => {
       logger.info('shutting down', { signal });
       await http.close();
+      await disposeSharedRenderer();
       process.exit(0);
     };
     process.once('SIGINT', () => void stop('SIGINT'));
@@ -101,6 +103,7 @@ async function main(): Promise<void> {
     stopping = true;
     logger.info('shutting down', { reason });
     await session.dispose();
+    await disposeSharedRenderer();
     process.exit(0);
   };
   process.once('SIGINT', () => void stop('SIGINT'));

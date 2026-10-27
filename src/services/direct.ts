@@ -158,7 +158,7 @@ const STRONG_BLOCKS: Array<[RegExp, string]> = [
 ];
 const WEAK_BLOCKS: Array<[RegExp, string]> = [
   [/g-recaptcha|hcaptcha\.com|recaptcha\/api\.js|turnstile/i, 'captcha'],
-  [/<title>[^<]*access denied[^<]*<\/title>|pardon our interruption|are you a robot|verify you are (a )?human|robot or human\?/i, 'bot_wall'],
+  [/<title>[^<]*access denied[^<]*<\/title>|pardon our interruption|are you a robot|verify you are (a )?human|robot or human\?|prove your humanity/i, 'bot_wall'],
 ];
 
 export type Verdict = { ok: true } | { ok: false; reason: string };
@@ -180,7 +180,9 @@ export function classifyDirect(res: DirectResponse, text: string): Verdict {
     const weak = WEAK_BLOCKS.find(([re]) => re.test(head));
     if (weak) return { ok: false, reason: weak[1] };
   }
-  if (/html/i.test(res.contentType) && visible.length < 200 && /<script/i.test(head)) return { ok: false, reason: 'needs_javascript' };
+  // client-side shells: scripts can start deep in the page (Instagram: ~90 KB in), so scan all of it
+  const isHtml = /html/i.test(res.contentType) || /^\s*<(!doctype|html)/i.test(head);
+  if (isHtml && visible.length < 200) return { ok: false, reason: /<script/i.test(res.body) ? 'needs_javascript' : 'empty' };
   return { ok: true };
 }
 

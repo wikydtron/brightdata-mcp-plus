@@ -117,8 +117,9 @@ async function fetchPage(svc: Services, ctx: ToolContext, tool: string, url: str
   return { text: await minifyMarkdown(res.body, opts.format), cached: res.cached, source: res.source, note: sourceNote(res) };
 }
 
-const FETCH_NOTE = 'Pages are fetched directly for free when the site allows it, and through Bright Data Web Unlocker '
-  + '(billed) only when the site blocks or needs JavaScript; a note after the result says which.';
+const FETCH_NOTE = 'Pages are fetched directly for free when the site allows it, rendered in a local headless browser (also '
+  + 'free) when they need JavaScript, and fetched through Bright Data Web Unlocker '
+  + '(billed) only when the site blocks; a note after the result says which.';
 
 export const scrapeAsMarkdown = defineTool({
   name: 'scrape_as_markdown',

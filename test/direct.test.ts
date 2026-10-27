@@ -102,7 +102,7 @@ for (const [path, reason] of [['/cf', 'cloudflare_challenge'], ['/spa', 'needs_j
   test(`auto: falls back to Bright Data on ${reason}`, async () => {
     const h = await connect(stub, { ...AUTO, DIRECT_MAX_BYTES: '20000' });
     const text = h.text(await h.call('scrape_as_markdown', { url: `${base}${path}` }));
-    assert.match(text, new RegExp(`Fetched via Bright Data \\(billed\\): direct fetch was not usable \\(${reason}\\)`));
+    assert.match(text, new RegExp(`Fetched via Bright Data \\(billed\\): free routes were not usable \\(${reason}\\)`));
     assert.equal(stub.unlockCalls(`${base}${path}`), 1);
     await h.close();
   });

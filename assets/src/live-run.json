@@ -1,31 +1,23 @@
 {
-  "recorded_at": "2026-10-27T02:04:22.508Z",
+  "recorded_at": "2026-10-27T02:35:53.923Z",
   "server": {
     "name": "brightdata-mcp-plus",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "tools": 5,
   "rows": [
     {
       "url": "https://en.wikipedia.org/wiki/Model_Context_Protocol",
       "ok": true,
-      "ms": 529,
+      "ms": 537,
       "chars": 1952,
       "note": "[server] Fetched directly (free).",
       "preview": "[Jump to content](#bodyContent) Main menu Main menu move to sidebar hide Navigation * [Mai"
     },
     {
-      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429",
-      "ok": true,
-      "ms": 384,
-      "chars": 2005,
-      "note": "[server] Fetched directly (free).",
-      "preview": "* [Skip to main content](#content) * [Skip to search](#mdn-search) [ MDN ](https://develop"
-    },
-    {
       "url": "https://news.ycombinator.com/",
       "ok": true,
-      "ms": 436,
+      "ms": 344,
       "chars": 2092,
       "note": "[server] Fetched directly (free).",
       "preview": "| [](https://news.ycombinator.com)[Hacker News](https://news.ycombinator.com/news)[new](ht"
@@ -33,46 +25,70 @@
     {
       "url": "https://github.com/modelcontextprotocol/servers",
       "ok": true,
-      "ms": 513,
+      "ms": 540,
       "chars": 2081,
       "note": "[server] Fetched directly (free).",
       "preview": "[Skip to content](#start-of-content) ## Navigation Menu [Sign in](https://github.com/login"
     },
     {
-      "url": "https://registry.npmjs.org/@modelcontextprotocol/sdk/latest",
+      "url": "https://open.spotify.com/artist/0TnOYISbd1XYRBk9myaseg",
       "ok": true,
-      "ms": 388,
-      "chars": 2091,
-      "note": "[server] Fetched directly (free).",
-      "preview": "{\"bugs\":{\"url\":\"https://github.com/modelcontextprotocol/typescript-sdk/issues\"},\"dist\":{\"s"
+      "ms": 3863,
+      "chars": 2092,
+      "note": "[server] Rendered in a local headless browser (free): the page needs JavaScript.",
+      "preview": "[Skip to main content](#main-view) [Spotify](https://open.spotify.com/) What do you want t"
+    },
+    {
+      "url": "https://www.instagram.com/nasa/",
+      "ok": true,
+      "ms": 2401,
+      "chars": 2077,
+      "note": "[server] Rendered in a local headless browser (free): the page needs JavaScript.",
+      "preview": "[Instagram](https://www.instagram.com/) [Log In](https://www.instagram.com/accounts/login/"
+    },
+    {
+      "url": "https://www.youtube.com/@Google",
+      "ok": true,
+      "ms": 3900,
+      "chars": 2027,
+      "note": "[server] Rendered in a local headless browser (free): the page needs JavaScript.",
+      "preview": "# # Back [ ](https://www.youtube.com/ \"YouTube Home\") CA Skip navigation Search Search wit"
+    },
+    {
+      "url": "https://www.tiktok.com/@nasa",
+      "ok": true,
+      "ms": 10314,
+      "chars": 2065,
+      "note": "[server] Rendered in a local headless browser (free): the page needs JavaScript.",
+      "preview": "Skip to content feed [TikTok](https://www.tiktok.com/) Log in [TikTok](https://www.tiktok."
     },
     {
       "url": "https://www.g2.com/products/notion/reviews",
       "ok": false,
-      "ms": 156,
+      "ms": 157,
       "chars": 0,
-      "note": "[blocked] Direct fetch of www.g2.com did not return usable content (cloudflare_challenge)",
+      "note": "[blocked] No free route returned usable content for www.g2.com (cloudflare_challenge)",
       "preview": ""
     },
     {
       "url": "https://www.reddit.com/r/mcp/",
       "ok": false,
-      "ms": 75,
+      "ms": 1786,
       "chars": 0,
-      "note": "[blocked] Direct fetch of www.reddit.com did not return usable content (needs_javascript)",
+      "note": "[blocked] No free route returned usable content for www.reddit.com (needs_javascript > render:captcha)",
       "preview": ""
     },
     {
       "url": "http://169.254.169.254/latest/meta-data/",
       "ok": false,
-      "ms": 0,
+      "ms": 1,
       "chars": 0,
       "note": "[bad_request] Refusing to fetch 169.254.169.254: it resolves to a private or local network address",
       "preview": ""
     }
   ],
   "stats": {
-    "uptime_s": 3,
+    "uptime_s": 24,
     "billable": {
       "unlocker_requests": 0,
       "scraper_records": 0,
@@ -81,25 +97,27 @@
     },
     "estimated_cost_usd": 0,
     "free": {
-      "direct_fetches": 5,
-      "direct_misses": 2,
-      "estimated_savings_usd": 0.0075
+      "direct_fetches": 3,
+      "local_renders": 4,
+      "fallbacks": 2,
+      "estimated_savings_usd": 0.0105
     },
     "budget": null,
     "tools": {
       "scrape_as_markdown": {
-        "calls": 8,
+        "calls": 10,
         "errors": 3,
         "cache_hits": 0,
-        "p50_ms": 387,
-        "p95_ms": 527
+        "p50_ms": 1786,
+        "p95_ms": 10313
       }
     },
     "fetch_strategy": "direct",
+    "local_rendering": "on",
     "cache": {
-      "entries": 5,
+      "entries": 7,
       "hits": 0,
-      "misses": 8
+      "misses": 10
     },
     "upstream_calls": 0,
     "open_browser_sessions": 0,

@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.2.0
+
+### Added
+- **Free local rendering:** pages that are JavaScript-only app shells (`needs_javascript`, `empty`) are rendered in
+  your installed Chrome or Edge (headless, via `playwright-core`, no browser download) before anything is sent to
+  Bright Data. Live-tested: Spotify, Instagram, YouTube, TikTok, Figma, Duolingo, Excalidraw and others now come back
+  with real content for free.
+- Rendered pages are classified again, so a bot wall that only appears after JavaScript runs (Reddit's CAPTCHA) still
+  goes to Bright Data, with a reason chain such as `needs_javascript > render:captcha`.
+- One shared browser process for all sessions, a fresh incognito context per render, images/media/fonts skipped,
+  idle shutdown after 2 minutes, bounded concurrency, cancellation.
+- In-browser SSRF guard: every request the page makes is checked against private, loopback, link-local and metadata
+  ranges (after DNS resolution), and a render that ends on such an address is discarded.
+- Host memory now also remembers hosts that need rendering, so later pages skip the doomed direct attempt.
+- `session_stats` reports `local_rendering` and `free.local_renders` / `free.fallbacks`; savings include renders.
+- `LOCAL_RENDER`, `CHROME_PATH`, `LOCAL_RENDER_TIMEOUT`, `LOCAL_RENDER_ON`, `LOCAL_RENDER_IDLE`,
+  `LOCAL_RENDER_CONCURRENCY`.
+
+### Fixed
+- Client-side shells whose first `<script>` sits deep in the page (Instagram: ~90 KB in) were classified as content.
+- Reddit's "Prove your humanity" page is recognised as a bot wall.
+
+### Changed
+- Fallback notes read `free routes were not usable (...)`; `session_stats.free.direct_misses` is replaced by
+  `local_renders` and `fallbacks`.
+
 ## 1.1.0
 
 ### Added
